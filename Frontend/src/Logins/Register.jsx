@@ -34,13 +34,25 @@ const Register = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsLoading(true);
+        setErrorMessage('');
     
         try {
-            const response = await api.post('/register', formData, {
-                headers: {
-                    'Access-Control-Allow-Origin': 'https://eleweights.vercel.app',
+            // First, try a OPTIONS request to check if the server is reachable
+            try {
+                await axios.options('https://eleweight.vercel.app/register');
+            } catch (optionsError) {
+                console.log('Options request failed:', optionsError);
+            }
+    
+            // Actual registration request
+            const response = await axios.post('https://eleweight.vercel.app/register', 
+                formData,
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
                 }
-            });
+            );
     
             if (response.data.message === 'You are signed in') {
                 localStorage.setItem('token', response.data.token);
@@ -51,14 +63,19 @@ const Register = () => {
                 setErrorMessage(response.data.message);
             }
         } catch (error) {
-            console.error('Registration error:', error);
-            
-            if (error.response?.status === 409) {
+            console.error('Detailed error:', {
+                message: error.message,
+                code: error.code,
+                response: error.response,
+                request: error.request
+            });
+    
+            if (error.code === 'ERR_NETWORK') {
+                setErrorMessage('Unable to connect to the server. Please check if the server is running and try again.');
+            } else if (error.response?.status === 409) {
                 setErrorMessage('Email already exists');
             } else if (error.response?.data?.message) {
                 setErrorMessage(error.response.data.message);
-            } else if (error.code === 'ERR_NETWORK') {
-                setErrorMessage('Network error. Please check your connection.');
             } else {
                 setErrorMessage('Registration failed. Please try again.');
             }
