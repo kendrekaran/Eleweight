@@ -9,13 +9,11 @@ require('dotenv').config();
 
 const app = express();
 app.use(express.json());
-app.use(cors(
-    {
-        origin : ["https://eleweights.vercel.app"],
-        methods : ["POST","GET","PUT"],
-        credentials : true
-    }
-))
+app.use(cors({
+    origin: "https://eleweights.vercel.app", 
+    methods: "GET,POST,PUT,DELETE",
+    allowedHeaders: "Content-Type,Authorization"
+}));
 
 const JWT_SECRET = process.env.JWT_SECRET
 const SALT_ROUNDS = 10
