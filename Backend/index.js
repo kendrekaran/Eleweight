@@ -10,10 +10,16 @@ require('dotenv').config();
 const app = express();
 app.use(express.json());
 app.use(cors({
-    origin: "https://eleweights.vercel.app/register", 
-    methods: "GET,POST,PUT,DELETE",
-    allowedHeaders: "Content-Type,Authorization"
-}));
+    origin: "https://eleweight.vercel.app",
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+    credentials: true,
+    preflightContinue: false,
+    optionsSuccessStatus: 204
+  }));
+// Handle preflight requests
+app.options('*', cors());
+  
 
 const JWT_SECRET = process.env.JWT_SECRET
 const SALT_ROUNDS = 10
