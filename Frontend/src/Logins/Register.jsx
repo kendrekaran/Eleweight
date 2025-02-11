@@ -13,6 +13,15 @@ const Register = () => {
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
 
+    const api = axios.create({
+        baseURL: 'https://eleweight.vercel.app',
+        withCredentials: true, 
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+        }
+    });
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({
@@ -25,10 +34,14 @@ const Register = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsLoading(true);
-
+    
         try {
-            const response = await axios.post('https://eleweight.vercel.app/register', formData);
-
+            const response = await api.post('/register', formData, {
+                headers: {
+                    'Access-Control-Allow-Origin': 'https://eleweights.vercel.app',
+                }
+            });
+    
             if (response.data.message === 'You are signed in') {
                 localStorage.setItem('token', response.data.token);
                 localStorage.setItem('userName', response.data.user.name);
@@ -38,10 +51,14 @@ const Register = () => {
                 setErrorMessage(response.data.message);
             }
         } catch (error) {
+            console.error('Registration error:', error);
+            
             if (error.response?.status === 409) {
                 setErrorMessage('Email already exists');
             } else if (error.response?.data?.message) {
                 setErrorMessage(error.response.data.message);
+            } else if (error.code === 'ERR_NETWORK') {
+                setErrorMessage('Network error. Please check your connection.');
             } else {
                 setErrorMessage('Registration failed. Please try again.');
             }
