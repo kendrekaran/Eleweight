@@ -7,18 +7,28 @@ const jwt = require("jsonwebtoken")
 const cors = require("cors")
 require('dotenv').config();
 
+const allowedOrigins = [
+    'https://eleweights.vercel.app',
+    'https://eleweight.vercel.app',
+    'https://eleweight.vercel.app/register'
+
+  ];
+
 const app = express();
 app.use(express.json());
 app.use(cors({
-    origin: "*",
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+    origin: function(origin, callback) {
+      if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
-    preflightContinue: false,
-    optionsSuccessStatus: 204
-  }));
-// Handle preflight requests
-app.options('*', cors());
+    optionsSuccessStatus: 200
+}));
   
 
 const JWT_SECRET = process.env.JWT_SECRET
